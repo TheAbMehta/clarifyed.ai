@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pandora · Prompt to Video</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+  <style>
+    :root {
+      --bg: #050505;
+      --surface: #111111;
+      --surface-alt: #181818;
+      --accent: #ffffff;
+      --accent-soft: rgba(255, 255, 255, 0.08);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --radius-xl: 999px;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.8);
+      --shadow-pill: 0 12px 30px rgba(0, 0, 0, 0.7);
+      --transition-fast: 180ms ease-out;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000000 100%);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Subtle vignette */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at top center, rgba(148, 163, 184, 0.18), transparent 55%),
+        radial-gradient(circle at bottom center, rgba(148, 163, 184, 0.12), transparent 55%);
+      mix-blend-mode: screen;
+      opacity: 0.85;
+      z-index: -1;
+    }
+
+    .shell {
+      min-height: 100vh;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* NAVBAR */
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #020617 0, #020617 40%, #111827 100%);
+      box-shadow: var(--shadow-pill);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      min-width: 170px;
+    }
+
+    .nav-logo-mark {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 0.9rem;
+    }
+
+    .nav-logo-mark span {
+      display: inline-block;
+      transform: translateY(-1px);
+    }
+
+    .nav-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.35);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-chip {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #f97316;
+    }
+
+    .nav-primary {
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: none;
+      background: #f9fafb;
+      color: #020617;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: default;
+      box-shadow: var(--shadow-pill);
+    }
+
+    /* MAIN LAYOUT */
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(0, 3.2fr) minmax(0, 3fr);
+      gap: 40px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* HERO */
+
+    .hero-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .hero-label::before {
+      content: "";
+      width: 34px;
+      height: 1px;
+      border-radius: 999px;
+      background: linear-gradient(to right, rgba(156, 163, 175, 0.1), rgba(249, 250, 251, 0.8));
+    }
+
+    .hero-title {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      font-size: clamp(2.2rem, 2.9vw, 2.9rem);
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      margin-bottom: 16px;
+    }
+
+    .hero-title span {
+      white-space: nowrap;
+    }
+
+    .hero-subtitle {
+      font-size: 0.98rem;
+      color: var(--text-muted);
+      max-width: 32rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .hero-note {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-note-pill {
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: #e5e7eb;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    /* FORM PANEL */
+
+    .panel {
+      background: radial-gradient(circle at top left, rgba(248, 250, 252, 0.1), transparent 55%),
+                  radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.45), #020617 75%);
+      border-radius: var(--radius-lg);
+      padding: 18px 18px 18px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background-image: radial-gradient(
+        circle at 50% 0%,
+        rgba(148, 163, 184, 0.35),
+        transparent 55%
+      );
+      opacity: 0.2;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .panel-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .panel-title {
+      font-size: 0.94rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--text-muted);
+    }
+
+    .panel-header-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .pill-small {
+      border-radius: 999px;
+      padding: 4px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.7);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-small-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .prompt-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .textarea-shell {
+      position: relative;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+    }
+
+    textarea {
+      width: 100%;
+      resize: vertical;
+      min-height: 120px;
+      max-height: 260px;
+      border-radius: 18px;
+      border: none;
+      padding: 12px 14px 32px;
+      font-size: 0.9rem;
+      background: transparent;
+      color: var(--text-main);
+      font-family: inherit;
+      line-height: 1.5;
+      outline: none;
+    }
+
+    textarea::placeholder {
+      color: rgba(148, 163, 184, 0.9);
+    }
+
+    .textarea-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 6px 10px 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent);
+    }
+
+    .textarea-footer span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tiny-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: #e5e7eb;
+    }
+
+    .primary-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 9px 18px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: #f9fafb;
+      color: #020617;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-pill);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+        background var(--transition-fast), opacity 120ms ease-out;
+      white-space: nowrap;
+    }
+
+    .primary-btn:hover:not([disabled]) {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
+    }
+
+    .primary-btn:active:not([disabled]) {
+      transform: translateY(0);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.9);
+    }
+
+    .primary-btn[disabled] {
+      cursor: default;
+      opacity: 0.7;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.8);
+    }
+
+    .btn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .panel-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .status-label {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.72rem;
+    }
+
+    .status-value {
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #9ca3af;
+    }
+
+    .status-dot.pending {
+      background: #fbbf24;
+      box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.25);
+    }
+
+    .status-dot.running {
+      background: #22c55e;
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.25);
+    }
+
+    .status-dot.completed {
+      background: #22c55e;
+      box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.25);
+    }
+
+    .status-dot.failed {
+      background: #ef4444;
+      box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.3);
+    }
+
+    .status-ellipsis {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.3em;
+      animation: ellipsis 900ms infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes ellipsis {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    .error-text {
+      font-size: 0.78rem;
+      color: #fecaca;
+      margin-top: 4px;
+    }
+
+    /* VIDEO PANEL */
+
+    .video-panel {
+      margin-top: 12px;
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.8);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .video-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .video-badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.7rem;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 16px;
+      outline: none;
+      display: block;
+      background: #020617;
+    }
+
+    .placeholder {
+      width: 100%;
+      min-height: 160px;
+      border-radius: 14px;
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background-image:
+        radial-gradient(circle at 15% 0, rgba(148, 163, 184, 0.18), transparent 60%),
+        radial-gradient(circle at 85% 100%, rgba(30, 64, 175, 0.3), transparent 60%);
+      background-color: rgba(15, 23, 42, 0.85);
+    }
+
+    .placeholder span {
+      max-width: 16rem;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .placeholder-arc {
+      width: 54px;
+      height: 54px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      border-top-color: rgba(248, 250, 252, 0.9);
+      border-left-color: rgba(248, 250, 252, 0.3);
+      margin-bottom: 10px;
+      animation: spin 1600ms linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* FOOTNOTE */
+
+    .footnote {
+      margin-top: 10px;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      max-width: 32rem;
+    }
+
+    .footnote strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="nav">
+      <div class="nav-pill">
+        <div class="nav-logo-mark">
+          <span>Tw</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:#9ca3af;">
+          <div class="nav-dot"></div>
+          <span>Pandora Engine</span>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="nav-chip">
+          <div class="nav-chip-dot"></div>
+          <span>Manim video pipeline</span>
+        </div>
+        <button class="nav-primary" type="button">
+          Teenagers build this
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <section>
+        <div class="hero-label">
+          Prompt-to-Video · ML
+        </div>
+        <h1 class="hero-title">
+          Describe a concept.<br />
+          <span>Pandora turns it into motion.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Pandora uses a multi-stage review loop to transform your prompt into a Manim animation.
+          Submit an idea in plain language and get back a rendered video when the pipeline finishes.
+        </p>
+        <div class="hero-note">
+          <span class="hero-note-pill">Note</span>
+          <span>Generation typically takes up to ~10 minutes. Keep this tab open; we will keep polling in the background.</span>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Prompt to video panel">
+        <div class="panel-inner">
+          <div class="panel-header">
+            <div class="panel-title">
+              Prompt Runner
+              <span class="panel-badge">Async job</span>
+            </div>
+            <div class="panel-header-meta">
+              <div class="pill-small">
+                <div class="pill-small-dot"></div>
+                <span>Backend: /generate</span>
+              </div>
+            </div>
+          </div>
+
+          <label class="prompt-label" for="prompt-input">
+            Prompt
+          </label>
+
+          <form id="prompt-form">
+            <div class="textarea-shell">
+              <textarea
+                id="prompt-input"
+                name="prompt"
+                placeholder="Example: Explain the geometry behind the unit circle and show how sine and cosine evolve as a point moves across it."
+                required
+              ></textarea>
+              <div class="textarea-footer">
+                <span>
+                  <div class="tiny-dot"></div>
+                  <span>Write naturally; technical math is welcome.</span>
+                </span>
+                <span id="job-id-label" style="opacity:0;">
+                  Job:
+                  <code id="job-id-value"></code>
+                </span>
+              </div>
+            </div>
+
+            <div class="panel-footer">
+              <button class="primary-btn" type="submit" id="generate-btn">
+                <div class="btn-dot"></div>
+                <span>Generate video</span>
+              </button>
+
+              <div class="status-pill">
+                <span class="status-label">Status</span>
+                <div class="status-dot" id="status-dot"></div>
+                <span class="status-value" id="status-text">Idle</span>
+                <span class="status-ellipsis" id="status-ellipsis" style="display:none;">...</span>
+              </div>
+            </div>
+          </form>
+
+          <div id="error-message" class="error-text" style="display:none;"></div>
+
+          <div class="video-panel" aria-live="polite">
+            <div class="video-header">
+              <div class="video-badge">Output</div>
+              <div id="video-meta">Waiting for a job…</div>
+            </div>
+            <div id="video-container">
+              <div class="placeholder" id="video-placeholder">
+                <div style="display:flex;flex-direction:column;align-items:center;">
+                  <div class="placeholder-arc"></div>
+                  <span>
+                    Submit a prompt to start a new job. Once completed, your Manim-rendered video will appear here with playback controls.
+                  </span>
+                </div>
+              </div>
+              <video id="result-video" controls style="display:none;"></video>
+            </div>
+          </div>
+
+          <p class="footnote">
+            The frontend polls <code>/status/&lt;job_id&gt;</code> every few seconds and then fetches
+            <code>/result/&lt;job_id&gt;</code> once the job is marked <strong>completed</strong>.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const API_BASE = "https://api.vyxm.in";
+
+      function buildApiUrl(path) {
+        if (!path) return API_BASE;
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+          return path;
+        }
+        return API_BASE.replace(/\/$/, "") + (path.startsWith("/") ? path : "/" + path);
+      }
+
+      const form = document.getElementById("prompt-form");
+      const promptInput = document.getElementById("prompt-input");
+      const generateBtn = document.getElementById("generate-btn");
+      const statusText = document.getElementById("status-text");
+      const statusDot = document.getElementById("status-dot");
+      const statusEllipsis = document.getElementById("status-ellipsis");
+      const errorMessage = document.getElementById("error-message");
+      const jobIdLabel = document.getElementById("job-id-label");
+      const jobIdValue = document.getElementById("job-id-value");
+      const videoElement = document.getElementById("result-video");
+      const placeholder = document.getElementById("video-placeholder");
+      const videoMeta = document.getElementById("video-meta");
+
+      let currentJobId = null;
+      let pollHandle = null;
+
+      function setStatus(state, message) {
+        statusText.textContent = message || state;
+        statusDot.className = "status-dot " + state;
+        if (state === "pending" || state === "running") {
+          statusEllipsis.style.display = "inline-block";
+        } else {
+          statusEllipsis.style.display = "none";
+        }
+      }
+
+      function setError(msg) {
+        if (!msg) {
+          errorMessage.style.display = "none";
+          errorMessage.textContent = "";
+        } else {
+          errorMessage.style.display = "block";
+          errorMessage.textContent = msg;
+        }
+      }
+
+      async function postJSON(url, body) {
+        const response = await fetch(buildApiUrl(url), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const msg = data && data.error ? data.error : "Request failed";
+          throw new Error(msg);
+        }
+        return data;
+      }
+
+      async function getJSON(url) {
+        const response = await fetch(buildApiUrl(url), {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const msg = data && data.error ? data.error : "Request failed";
+          throw new Error(msg);
+        }
+        return data;
+      }
+
+      async function pollStatus() {
+        if (!currentJobId) return;
+
+        try {
+          const data = await getJSON("/status/" + currentJobId);
+          const s = data.status;
+          if (s === "pending") {
+            setStatus("pending", "Queued");
+            videoMeta.textContent = "Job queued on the backend…";
+          } else if (s === "running") {
+            setStatus("running", "Rendering");
+            videoMeta.textContent = "Rendering in progress. This can take several minutes.";
+          } else if (s === "completed") {
+            clearInterval(pollHandle);
+            pollHandle = null;
+            setStatus("completed", "Completed");
+            await fetchResult();
+          } else if (s === "failed") {
+            clearInterval(pollHandle);
+            pollHandle = null;
+            setStatus("failed", "Failed");
+            videoMeta.textContent = "Job failed. See error message below.";
+          } else {
+            setStatus("", "Unknown");
+          }
+        } catch (err) {
+          setError("Failed to check status: " + err.message);
+        }
+      }
+
+      async function fetchResult() {
+        if (!currentJobId) return;
+
+        try {
+          const data = await getJSON("/result/" + currentJobId);
+
+          if (data.status && data.status !== "completed") {
+            videoMeta.textContent = "Result not ready yet (" + data.status + ").";
+            return;
+          }
+
+          if (!data.video_file) {
+            setError("No video file reported by backend.");
+            videoMeta.textContent = "Video could not be loaded.";
+            return;
+          }
+
+          const src = data.video_file;
+          placeholder.style.display = "none";
+          videoElement.style.display = "block";
+          videoElement.src = src;
+          videoElement.load();
+          videoMeta.textContent = "Manim-rendered video ready. Press play to watch.";
+          generateBtn.disabled = false;
+        } catch (err) {
+          setError("Failed to fetch result: " + err.message);
+          videoMeta.textContent = "Could not fetch video result.";
+        }
+      }
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const prompt = promptInput.value.trim();
+        if (!prompt) return;
+
+        if (pollHandle) {
+          clearInterval(pollHandle);
+          pollHandle = null;
+        }
+
+        setError(null);
+        setStatus("pending", "Submitting");
+        generateBtn.disabled = true;
+        videoMeta.textContent = "Job has not started yet.";
+
+        placeholder.style.display = "flex";
+        videoElement.style.display = "none";
+        videoElement.removeAttribute("src");
+        videoElement.load();
+
+        try {
+          const data = await postJSON("/generate", { prompt });
+
+          currentJobId = data.job_id;
+          jobIdValue.textContent = currentJobId;
+          jobIdLabel.style.opacity = 1;
+
+          setStatus("pending", "Pending");
+          videoMeta.textContent = "Job submitted. Waiting for backend workers…";
+
+          pollHandle = setInterval(pollStatus, 8000);
+          pollStatus();
+        } catch (err) {
+          setError("Failed to submit job: " + err.message);
+          setStatus("", "Idle");
+          generateBtn.disabled = false;
+        }
+      });
+
+      setStatus("", "Idle");
+    })();
+  </script>
+</body>
+</html>

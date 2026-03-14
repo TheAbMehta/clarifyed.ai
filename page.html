@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Scene Slideshow</title>
+
+<style>
+body{
+  margin:0;
+  background:#0b0b14;
+  color:#fff;
+  font-family:system-ui, sans-serif;
+}
+.app{
+  max-width:1000px;
+  margin:auto;
+  padding:20px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+input{
+  flex:1;
+  padding:14px;
+  border-radius:10px;
+  border:1px solid #333;
+  background:#111;
+  color:#fff;
+}
+
+button{
+  padding:14px 18px;
+  border-radius:10px;
+  border:none;
+  background:#7b6cff;
+  color:#000;
+  cursor:pointer;
+}
+
+.player{
+  margin-top:16px;
+  display:none;
+}
+
+.video-wrap{
+  position:relative;
+  background:#000;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+video{
+  width:100%;
+}
+
+.overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.6);
+  color:#aaa;
+  font-size:18px;
+}
+
+.nav{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+
+.slides{
+  display:flex;
+  gap:6px;
+  margin-top:10px;
+}
+
+.slide{
+  flex:1;
+  text-align:center;
+  padding:6px;
+  font-size:12px;
+  border-radius:8px;
+  background:#111;
+  border:1px solid #333;
+  color:#666;
+  cursor:pointer;
+}
+.slide.ready{
+  border-color:#7b6cff;
+  color:#fff;
+}
+.slide.active{
+  background:#7b6cff;
+  color:#000;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="row">
+    <input id="prompt" placeholder="Describe the video…" />
+    <button onclick="run()">Generate</button>
+  </div>
+
+  <div class="row">
+    <input id="threadInput" placeholder="Existing thread_id…" />
+    <button onclick="loadThread()">Load</button>
+  </div>
+
+  <div class="player" id="player">
+    <div class="video-wrap">
+      <video id="video" controls muted playsinline></video>
+      <div class="overlay" id="overlay">Waiting…</div>
+    </div>
+
+    <div class="nav">
+      <button onclick="prev()">← Prev</button>
+      <button onclick="next()">Next →</button>
+    </div>
+
+    <div class="slides" id="slides"></div>
+  </div>
+
+</div>
+
+<script>
+const API = "https://api.vyxm.in";
+const MAX_SCENES = 12;
+const POLL_MS = 30000;
+
+let threadId = null;
+let current = 0;
+let ready = Array(MAX_SCENES).fill(false);
+let poller = null;
+
+const video = document.getElementById("video");
+const overlay = document.getElementById("overlay");
+const slides = document.getElementById("slides");
+
+/* ---------- Start ---------- */
+async function run(){
+  const p = prompt.value.trim();
+  if(!p) return;
+
+  const r = await fetch(`${API}/run`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ prompt:p })
+  });
+  const d = await r.json();
+  init(d.thread_id);
+}
+
+function loadThread(){
+  const id = threadInput.value.trim();
+  if(id) init(id);
+}
+
+function init(id){
+  threadId = id;
+  current = 0;
+  ready.fill(false);
+
+  document.getElementById("player").style.display = "block";
+  overlay.textContent = "Waiting for scene 1…";
+  overlay.style.display = "flex";
+
+  renderSlides();
+  pollAllScenes();
+
+  if(poller) clearInterval(poller);
+  poller = setInterval(pollAllScenes, POLL_MS);
+}
+
+/* ---------- Poll all scenes ---------- */
+function pollAllScenes(){
+  for(let i=0;i<MAX_SCENES;i++){
+    if(ready[i]) continue;
+    probeScene(i);
+  }
+}
+
+function probeScene(i){
+  const probe = document.createElement("video");
+  probe.src = `${API}/scene/${threadId}/scene_${i+1}`;
+  probe.preload = "metadata";
+
+  probe.onloadeddata = () => {
+    ready[i] = true;
+    renderSlides();
+    if(i === current) play(i);
+  };
+
+  // ignore errors – scene just not ready yet
+}
+
+/* ---------- Playback ---------- */
+function play(i){
+  current = i;
+  overlay.style.display = "none";
+
+  video.pause();
+  video.src = `${API}/scene/${threadId}/scene_${i+1}`;
+  video.load();
+  video.play().catch(()=>{});
+
+  renderSlides();
+}
+
+video.addEventListener("ended", () => {
+  next();
+});
+
+/* ---------- Navigation ---------- */
+function next(){
+  for(let i=current+1;i<MAX_SCENES;i++){
+    if(ready[i]){
+      play(i);
+      return;
+    }
+  }
+  overlay.textContent = "Waiting for next scene…";
+  overlay.style.display = "flex";
+}
+
+function prev(){
+  for(let i=current-1;i>=0;i--){
+    if(ready[i]){
+      play(i);
+      return;
+    }
+  }
+}
+
+document.addEventListener("keydown", e => {
+  if(e.key === "ArrowRight") next();
+  if(e.key === "ArrowLeft") prev();
+});
+
+/* ---------- UI ---------- */
+function renderSlides(){
+  slides.innerHTML = "";
+  for(let i=0;i<MAX_SCENES;i++){
+    const s = document.createElement("div");
+    s.className = "slide";
+    s.textContent = ready[i] ? `Scene ${i+1}` : "Pending";
+    if(ready[i]) s.classList.add("ready");
+    if(i === current) s.classList.add("active");
+    s.onclick = () => ready[i] && play(i);
+    slides.appendChild(s);
+  }
+}
+</script>
+</body>
+</html>

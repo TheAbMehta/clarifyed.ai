@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pandora — Join the Waitlist | Teenage Works</title>
+  <meta name="description" content="Join the Pandora waitlist — AI video tutoring for STEM. Turn any doubt into a beautifully animated video explanation.">
+  <meta property="og:title" content="Pandora — Join the Waitlist">
+  <meta property="og:description" content="AI Video Tutoring for STEM. Transform any doubt into an animated video explanation.">
+  <meta property="og:image" content="https://teenage.works/pandora.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="https://teenage.works/pandora.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --border-focus: rgba(255,255,255,0.18);
+      --text: #f0f0f0;
+      --text-dim: #777;
+      --accent: #e8c46c;
+      --accent-glow: rgba(232,196,108,0.12);
+      --radius: 14px;
+      --font: 'Space Grotesk', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .bg-noise {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 256px 256px;
+    }
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .bg-glow::before {
+      content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 500px;
+      background: radial-gradient(ellipse, rgba(232,196,108,0.05) 0%, transparent 70%);
+    }
+    .bg-glow::after {
+      content: ''; position: absolute; bottom: -200px; right: -100px;
+      width: 600px; height: 400px;
+      background: radial-gradient(circle, rgba(100,140,255,0.025) 0%, transparent 70%);
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      width: 88%; max-width: 560px;
+      padding: 12px 22px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-radius: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 999;
+      animation: fadeInNav 1s ease-out;
+    }
+    .nav-brand { display: flex; align-items: center; text-decoration: none; border: none; }
+    .nav-brand img { height: 35px; opacity: 0.85; }
+    .nav-links { display: flex; gap: 4px; align-items: center; }
+    .nav-links a {
+      font-size: 13px; color: rgba(255,255,255,0.45);
+      text-decoration: none; border: none; padding: 6px 14px;
+      border-radius: 8px; transition: all 0.3s;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+    .nav-pandora {
+      color: #fff !important; font-weight: 600;
+      background: rgba(255,255,255,0.1) !important;
+    }
+    .nav-pandora:hover { background: rgba(255,255,255,0.14) !important; }
+
+    @keyframes fadeInNav {
+      from { opacity: 0; transform: translate(-50%, -20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh; padding: 110px 20px 60px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center; margin-bottom: 44px;
+      animation: fadeUp 1s ease-out;
+    }
+    .hero-logo {
+      height: clamp(100px, 18vw, 160px);
+      filter: brightness(1.1);
+      transition: filter 0.3s;
+      margin-bottom: 20px;
+    }
+    .hero-logo:hover { filter: brightness(1.3); }
+    .hero-sub {
+      font-size: 14px; color: var(--text-dim);
+      line-height: 1.7; max-width: 360px; margin: 0 auto;
+    }
+
+    /* ── FLIP COUNTER ── */
+    .counter-wrap {
+      margin-bottom: 48px;
+      animation: fadeUp 1.2s ease-out;
+    }
+    .counter-label-top {
+      text-align: center; margin-bottom: 14px;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .flip-counter {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .flip-digit {
+      position: relative; width: 54px; height: 72px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; perspective: 300px;
+    }
+    .flip-digit .digit-current,
+    .flip-digit .digit-next {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 2rem; font-weight: 700;
+      color: var(--text);
+    }
+    .flip-digit .digit-next {
+      transform: rotateX(-90deg); transform-origin: bottom center;
+    }
+    .flip-digit.flipping .digit-current { animation: flipOut 0.4s ease-in forwards; }
+    .flip-digit.flipping .digit-next { animation: flipIn 0.4s ease-out 0.2s forwards; }
+    @keyframes flipOut {
+      0% { transform: rotateX(0); opacity: 1; }
+      100% { transform: rotateX(90deg); opacity: 0; }
+    }
+    @keyframes flipIn {
+      0% { transform: rotateX(-90deg); opacity: 0; }
+      100% { transform: rotateX(0); opacity: 1; }
+    }
+    .flip-digit .digit-shine {
+      position: absolute; inset: 0; top: 50%;
+      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.15));
+      pointer-events: none;
+    }
+    .flip-digit .digit-line {
+      position: absolute; top: 50%; left: 0; right: 0;
+      height: 1px; background: rgba(0,0,0,0.3);
+      pointer-events: none; z-index: 2;
+    }
+
+    /* ── FORM ── */
+    .form-wrap {
+      width: 100%; max-width: 440px;
+      animation: fadeUp 1.4s ease-out;
+    }
+    .card {
+      padding: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .card-title {
+      font-size: 20px; font-weight: 600; margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .msg {
+      display: none; padding: 12px 14px; border-radius: 8px;
+      font-size: 13px; margin-bottom: 16px; line-height: 1.5;
+    }
+    .msg.error { display: block; background: rgba(255,80,80,0.08); border: 1px solid rgba(255,80,80,0.2); color: #ff9b9b; }
+    .msg.info { display: block; background: rgba(232,196,108,0.08); border: 1px solid rgba(232,196,108,0.2); color: var(--accent); }
+
+    .row { display: flex; gap: 12px; }
+    .row .field { flex: 1; }
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block; font-size: 12px; font-weight: 500;
+      color: var(--text-dim); margin-bottom: 6px; letter-spacing: 0.02em;
+    }
+    .field label .opt { color: rgba(255,255,255,0.2); font-weight: 400; }
+    input, select {
+      width: 100%; padding: 12px 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-family: var(--font); font-size: 14px;
+      outline: none; transition: border-color 0.25s, background 0.25s;
+    }
+    input::placeholder { color: rgba(255,255,255,0.18); }
+    input:focus, select:focus {
+      border-color: var(--border-focus);
+      background: rgba(255,255,255,0.05);
+    }
+    select {
+      appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+    select option { background: #111; color: #eee; }
+
+    .btn {
+      width: 100%; padding: 14px; margin-top: 6px;
+      background: var(--text); color: var(--bg);
+      border: none; border-radius: 8px;
+      font-family: var(--font); font-size: 14px; font-weight: 600;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: all 0.3s;
+    }
+    .btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 4px 24px rgba(255,255,255,0.1); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn .spin {
+      display: none; width: 16px; height: 16px;
+      border: 2px solid rgba(0,0,0,0.15); border-top-color: #000;
+      border-radius: 50%; animation: spin 0.6s linear infinite; margin: 0 auto;
+    }
+    .btn.loading .spin { display: block; }
+    .btn.loading .btn-label { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .note {
+      text-align: center; margin-top: 14px;
+      font-size: 11px; color: rgba(255,255,255,0.2); font-family: var(--mono);
+    }
+
+    /* ── SUCCESS ── */
+    .success { display: none; text-align: center; padding: 44px 32px; }
+    .success.visible { display: block; animation: fadeUp 0.6s ease-out; }
+    .success-ring {
+      width: 64px; height: 64px; border-radius: 50%;
+      border: 2px solid var(--accent); margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center; font-size: 28px;
+      box-shadow: 0 0 40px rgba(232,196,108,0.15);
+      animation: glowRing 3s ease-in-out infinite;
+    }
+    @keyframes glowRing {
+      0%, 100% { box-shadow: 0 0 40px rgba(232,196,108,0.15); }
+      50% { box-shadow: 0 0 60px rgba(232,196,108,0.25); }
+    }
+    .success h3 { font-size: 1.3rem; margin-bottom: 8px; }
+    .success p { color: var(--text-dim); font-size: 14px; line-height: 1.6; }
+    .success-email {
+      margin-top: 18px; padding: 14px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 8px; font-family: var(--mono); font-size: 13px; color: var(--accent);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1; text-align: center;
+      padding: 40px 20px; font-size: 12px; color: rgba(255,255,255,0.15);
+    }
+    footer a { color: rgba(255,255,255,0.25); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    footer a:hover { color: rgba(255,255,255,0.5); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+    @media (max-width: 640px) {
+      .navbar { width: 92%; padding: 10px 16px; top: 12px; }
+      .page { padding-top: 90px; }
+      .hero-logo { height: clamp(80px, 22vw, 120px); }
+      .flip-digit { width: 44px; height: 60px; border-radius: 8px; }
+      .flip-digit .digit-current, .flip-digit .digit-next { font-size: 1.6rem; }
+      .card { padding: 24px; }
+      .row { flex-direction: column; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-noise"></div>
+  <div class="bg-glow"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="https://teenage.works" class="nav-brand">
+      <img src="https://teenage.works/logo-small.png" alt="Teenage Works">
+    </a>
+    <div class="nav-links">
+      <a href="https://teenage.works">Home</a>
+      <a href="https://teenage.works/#contact">Contact</a>
+      <a href="https://teenage.works/pandora" class="nav-pandora">Pandora</a>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <!-- HERO -->
+    <div class="hero">
+      <img src="https://teenage.works/pandora.png" alt="Pandora" class="hero-logo">
+      <p class="hero-sub">Turn any STEM doubt into a beautifully animated video explanation. Join the list, we'll let you in soon.</p>
+    </div>
+
+    <!-- FLIP COUNTER -->
+    <div class="counter-wrap">
+      <div class="counter-label-top">People on the Waitlist</div>
+      <div class="flip-counter" id="flipCounter"></div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-wrap">
+      <div class="card" id="formCard">
+        <div class="card-title">Join waitlist</div>
+        <div class="msg" id="formMsg"></div>
+        <form id="waitlistForm" onsubmit="return false;">
+          <div class="row">
+            <div class="field">
+              <label>First name</label>
+              <input type="text" id="firstName" placeholder="Evil" required>
+            </div>
+            <div class="field">
+              <label>Last name</label>
+              <input type="text" id="lastName" placeholder="Larry" required>
+            </div>
+          </div>
+          <div class="field">
+            <label>Email address</label>
+            <input type="email" id="email" placeholder="evil@larry.com" required>
+          </div>
+          <div class="field">
+            <label>What describes you best?</label>
+            <select id="interest">
+              <option value="" disabled selected>Pick one…</option>
+              <option value="middleschool">Middle-School Student</option>
+              <option value="highschool">High-School Student</option>
+              <option value="university">University Student</option>
+              <option value="tutor">Tutor/Educator</option>
+              <option value="content-creator">STEM Content Creator</option>
+              <option value="other">Something else entirely</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Anything else? <span class="opt">(optional)</span></label>
+            <input type="text" id="note" placeholder="A thought, a link, a use case...">
+          </div>
+          <button type="button" class="btn" id="submitBtn" onclick="handleSubmit()">
+            <span class="btn-label">Join the Waitlist</span>
+            <span class="spin"></span>
+          </button>
+        </form>
+        <p class="note">We'll send a verification email to confirm your spot.</p>
+      </div>
+
+      <div class="card success" id="successState">
+        <div class="success-ring">✉</div>
+        <h3>Check your email</h3>
+        <p>We've sent a confirmation link to verify your spot. Click it to lock in your position.</p>
+        <div class="success-email" id="successEmail"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2026 <a href="https://teenage.works">Teenage Works</a> — Built with chaos, curiosity, and code.</p>
+  </footer>
+
+  <script>
+    const API_BASE = 'https://waitlist.teenage.works/waitlist';
+
+    const DIGIT_COUNT = 4;
+    let currentDigits = Array(DIGIT_COUNT).fill(0);
+    let counterInitialized = false;
+
+    function initCounter() {
+      const c = document.getElementById('flipCounter');
+      c.innerHTML = '';
+      for (let i = 0; i < DIGIT_COUNT; i++) {
+        const d = document.createElement('div');
+        d.className = 'flip-digit';
+        d.id = `digit-${i}`;
+        d.innerHTML = '<div class="digit-current">0</div><div class="digit-next">0</div><div class="digit-line"></div><div class="digit-shine"></div>';
+        c.appendChild(d);
+      }
+    }
+
+    function flipTo(target) {
+      const padded = String(target).padStart(DIGIT_COUNT, '0');
+      const newDigits = padded.split('').map(Number);
+      newDigits.forEach((nd, i) => {
+        const el = document.getElementById(`digit-${i}`);
+        if (!el) return;
+        const curr = el.querySelector('.digit-current');
+        const next = el.querySelector('.digit-next');
+        if (nd === currentDigits[i] && counterInitialized) return;
+        next.textContent = nd;
+        setTimeout(() => {
+          el.classList.add('flipping');
+          setTimeout(() => {
+            curr.textContent = nd;
+            el.classList.remove('flipping');
+            next.style.transform = 'rotateX(-90deg)';
+            next.style.opacity = '0';
+            curr.style.transform = 'rotateX(0)';
+            curr.style.opacity = '1';
+          }, 600);
+        }, i * 120);
+      });
+      currentDigits = newDigits;
+      counterInitialized = true;
+    }
+
+    async function loadCounter() {
+      try {
+        const res = await fetch(`${API_BASE}/count`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        flipTo(data.count);
+      } catch { flipTo(0); }
+    }
+
+    initCounter();
+    loadCounter();
+    setInterval(loadCounter, 20000);
+
+    async function handleSubmit() {
+      const btn = document.getElementById('submitBtn');
+      const msgEl = document.getElementById('formMsg');
+      msgEl.style.display = 'none';
+      msgEl.className = 'msg';
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const interest = document.getElementById('interest').value;
+      const note = document.getElementById('note').value.trim();
+
+      if (!firstName || !lastName || !email) {
+        shakeInput(!firstName ? 'firstName' : !lastName ? 'lastName' : 'email');
+        return;
+      }
+      if (!email.includes('@') || !email.includes('.')) {
+        shakeInput('email');
+        showMsg('Please enter a valid email address.', 'error');
+        return;
+      }
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ firstName, lastName, email, interest, note }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showMsg(data.detail || 'Something went wrong.', res.status === 409 ? 'info' : 'error');
+          btn.classList.remove('loading'); btn.disabled = false;
+          return;
+        }
+
+        if (data.resent) {
+          showMsg(data.message, 'info');
+          btn.classList.remove('loading'); btn.disabled = false;
+          return;
+        }
+
+        setTimeout(() => {
+          document.getElementById('formCard').style.display = 'none';
+          document.getElementById('successState').classList.add('visible');
+          document.getElementById('successEmail').textContent = email;
+          loadCounter();
+        }, 400);
+
+      } catch {
+        showMsg('Network error — check your connection.', 'error');
+        btn.classList.remove('loading'); btn.disabled = false;
+      }
+    }
+
+    function showMsg(text, type) {
+      const el = document.getElementById('formMsg');
+      el.textContent = text; el.className = `msg ${type}`; el.style.display = 'block';
+    }
+
+    function shakeInput(id) {
+      const el = document.getElementById(id);
+      el.style.borderColor = 'rgba(255,80,80,0.4)';
+      el.style.animation = 'shake 0.4s ease';
+      setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 500);
+    }
+  </script>
+
+</body>
+</html>
